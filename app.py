@@ -43,8 +43,11 @@ async def root():
             .text { margin-bottom: 10px; }
             .file-name { margin-top: 10px; }
             .is-hidden { display: none !important; }
-            .file-preview { display: flex; justify-content: center; margin: 20px auto 10px; }
-            .file-preview img { max-height: 400px; object-fit: contain; }
+            .tabs { display: flex; margin-bottom: 20px; }
+            .tab { padding: 10px 20px; cursor: pointer; background: #ddd; margin-right: 5px; border-radius: 3px 3px 0 0; }
+            .tab.active { background: #fff; border-bottom: none; }
+            .tab-content { display: none; }
+            .tab-content.active { display: block; }
             .upload-button { background-color: #003894; border-radius: 3px; color: #fff; padding: 5px 10px; width: 150px; border: none; cursor: pointer; }
             .cancel-button { border: 1px solid #003894; border-radius: 3px; margin: 10px auto 0; padding: 5px 10px; width: 150px; background: none; cursor: pointer; }
             footer { max-width: 940px; text-align: center; font-size: 14px; margin: 20px auto; }
@@ -84,18 +87,49 @@ async def root():
                         <p class="text">タイトルを修正したPDFを<br>ダウンロード</p>
                     </li>
                 </ul>
-                <p class="note">※1ファイルのサイズ上限は100MB、最大20ファイルまでアップロード可能です。</p>
+                <p class="note">※1ファイルのサイズ上限は10MB、最大20ファイルまでアップロード可能です。</p>
             </section>
             <section>
-                <div class="js-fileUpload">
-                    <div class="text">ここにファイルをドラッグ＆ドロップ<br>または</div>
-                    <form id="upload_form" method="post" enctype="multipart/form-data">
-                        <input type="file" id="files" name="files" class="file-input is-hidden" multiple accept=".pdf">
-                        <button type="button" class="upload-button" onclick="document.getElementById('files').click();">ファイル選択</button>
-                        <button type="submit" class="upload-button" style="display: none;">アップロード</button>
-                    </form>
-                    <div class="file-name is-hidden"></div>
-                    <div class="cancel-button is-hidden">キャンセル</div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="normal">通常アップロード</div>
+                    <div class="tab" data-tab="sequential">連番ファイル</div>
+                    <div class="tab" data-tab="common">共通語句</div>
+                </div>
+                <div class="tab-content active" id="normal">
+                    <div class="js-fileUpload">
+                        <div class="text">ここにファイルをドラッグ＆ドロップ<br>または</div>
+                        <form id="normal_form" method="post" enctype="multipart/form-data">
+                            <input type="file" id="normal_files" name="files" class="file-input is-hidden" multiple accept=".pdf">
+                            <button type="button" class="upload-button" onclick="document.getElementById('normal_files').click();">ファイル選択</button>
+                            <button type="submit" class="upload-button" style="display: none;">アップロード</button>
+                        </form>
+                        <div class="file-name is-hidden"></div>
+                        <div class="cancel-button is-hidden">キャンセル</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="sequential">
+                    <div class="js-fileUpload">
+                        <div class="text">連番ファイル（例：report_001.pdf）をドラッグ＆ドロップ<br>または</div>
+                        <form id="sequential_form" method="post" enctype="multipart/form-data">
+                            <input type="file" id="sequential_files" name="files" class="file-input is-hidden" multiple accept=".pdf">
+                            <button type="button" class="upload-button" onclick="document.getElementById('sequential_files').click();">ファイル選択</button>
+                            <button type="submit" class="upload-button" style="display: none;">アップロード</button>
+                        </form>
+                        <div class="file-name is-hidden"></div>
+                        <div class="cancel-button is-hidden">キャンセル</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="common">
+                    <div class="js-fileUpload">
+                        <div class="text">共通語句を追加するファイルをドラッグ＆ドロップ<br>または</div>
+                        <form id="common_form" method="post" enctype="multipart/form-data">
+                            <input type="file" id="common_files" name="files" class="file-input is-hidden" multiple accept=".pdf">
+                            <button type="button" class="upload-button" onclick="document.getElementById('common_files').click();">ファイル選択</button>
+                            <button type="submit" class="upload-button" style="display: none;">アップロード</button>
+                        </form>
+                        <div class="file-name is-hidden"></div>
+                        <div class="cancel-button is-hidden">キャンセル</div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -103,61 +137,76 @@ async def root():
             <div>powered by <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a></div>
         </footer>
         <script>
-            const dropZone = document.querySelector('.js-fileUpload');
-            const fileInput = document.getElementById('files');
-            const form = document.getElementById('upload_form');
-            const fileNameDiv = document.querySelector('.file-name');
-            const cancelButton = document.querySelector('.cancel-button');
-            const submitButton = form.querySelector('button[type="submit"]');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const forms = document.querySelectorAll('form');
+            const fileInputs = document.querySelectorAll('.file-input');
+            const fileNameDivs = document.querySelectorAll('.file-name');
+            const cancelButtons = document.querySelectorAll('.cancel-button');
 
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.style.backgroundColor = '#e0e0e0';
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
             });
 
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.style.backgroundColor = '';
-            });
+            forms.forEach((form, index) => {
+                const fileInput = fileInputs[index];
+                const fileNameDiv = fileNameDivs[index];
+                const cancelButton = cancelButtons[index];
 
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.style.backgroundColor = '';
-                fileInput.files = e.dataTransfer.files;
-                updateFileNames();
-                form.submit();
-            });
+                form.querySelector('.js-fileUpload').addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    form.querySelector('.js-fileUpload').style.backgroundColor = '#e0e0e0';
+                });
 
-            fileInput.addEventListener('change', () => {
-                updateFileNames();
-                form.submit();
-            });
+                form.querySelector('.js-fileUpload').addEventListener('dragleave', () => {
+                    form.querySelector('.js-fileUpload').style.backgroundColor = '';
+                });
 
-            function updateFileNames() {
-                if (fileInput.files.length > 20) {
-                    alert('最大20ファイルまでアップロード可能です。');
+                form.querySelector('.js-fileUpload').addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    form.querySelector('.js-fileUpload').style.backgroundColor = '';
+                    fileInput.files = e.dataTransfer.files;
+                    updateFileNames(fileInput, fileNameDiv, cancelButton);
+                    form.submit();
+                });
+
+                fileInput.addEventListener('change', () => {
+                    updateFileNames(fileInput, fileNameDiv, cancelButton);
+                    form.submit();
+                });
+
+                cancelButton.addEventListener('click', () => {
                     fileInput.value = '';
-                    return;
-                }
-                for (let file of fileInput.files) {
-                    if (file.size > 100 * 1024 * 1024) {
-                        alert('1ファイルのサイズ上限は100MBです。');
-                        fileInput.value = '';
+                    fileNameDiv.classList.add('is-hidden');
+                    cancelButton.classList.add('is-hidden');
+                    fileNameDiv.textContent = '';
+                });
+
+                function updateFileNames(input, nameDiv, cancelBtn) {
+                    if (input.files.length > 20) {
+                        alert('最大20ファイルまでアップロード可能です。');
+                        input.value = '';
                         return;
                     }
+                    for (let file of input.files) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            alert('1ファイルのサイズ上限は10MBです。');
+                            input.value = '';
+                            return;
+                        }
+                    }
+                    if (input.files.length > 0) {
+                        nameDiv.classList.remove('is-hidden');
+                        cancelBtn.classList.remove('is-hidden');
+                        let names = Array.from(input.files).map(f => f.name).join(', ');
+                        nameDiv.textContent = `選択されたファイル: ${names}`;
+                    }
                 }
-                if (fileInput.files.length > 0) {
-                    fileNameDiv.classList.remove('is-hidden');
-                    cancelButton.classList.remove('is-hidden');
-                    let names = Array.from(fileInput.files).map(f => f.name).join(', ');
-                    fileNameDiv.textContent = `選択されたファイル: ${names}`;
-                }
-            }
-
-            cancelButton.addEventListener('click', () => {
-                fileInput.value = '';
-                fileNameDiv.classList.add('is-hidden');
-                cancelButton.classList.add('is-hidden');
-                fileNameDiv.textContent = '';
             });
         </script>
     </body>
@@ -165,7 +214,7 @@ async def root():
     """
 
 @app.post("/", response_class=HTMLResponse)
-async def upload(files: List[UploadFile] = File(...)):
+async def upload(files: List[UploadFile] = File(...), request: Request):
     global TEMP_FILES
     TEMP_FILES.clear()
     
@@ -175,10 +224,19 @@ async def upload(files: List[UploadFile] = File(...)):
     
     # ファイルサイズ制限
     for file in files:
-        if file.size > 100 * 1024 * 1024:  # 100MB
-            return HTMLResponse("エラー: 1ファイルのサイズ上限は100MBです。", status_code=400)
+        if file.size > 10 * 1024 * 1024:  # 10MB
+            return HTMLResponse("エラー: 1ファイルのサイズ上限は10MBです。", status_code=400)
     
     file_list = []
+    form_data = await request.form()
+    upload_type = "normal"
+    if "normal_files" in form_data:
+        upload_type = "normal"
+    elif "sequential_files" in form_data:
+        upload_type = "sequential"
+    elif "common_files" in form_data:
+        upload_type = "common"
+    
     for file in files:
         filename = file.filename
         contents = await file.read()
@@ -190,8 +248,9 @@ async def upload(files: List[UploadFile] = File(...)):
         file_list.append({"filename": filename, "title": title})
         TEMP_FILES[filename] = temp_path
     
-    # 連番でソート
-    file_list.sort(key=lambda x: x["filename"])
+    # 連番ソート（sequential のみ）
+    if upload_type == "sequential":
+        file_list.sort(key=lambda x: x["filename"])
     
     css = """
     <style>
@@ -208,6 +267,7 @@ async def upload(files: List[UploadFile] = File(...)):
         .download-button:hover { background-color: #002566; }
         .common-field { margin: 10px 0; }
         .prefix, .suffix, .middle { display: none; }
+        .stem, .number { display: none; }
         footer { max-width: 940px; text-align: center; font-size: 14px; margin: 20px auto; }
     </style>
     """
@@ -229,24 +289,68 @@ async def upload(files: List[UploadFile] = File(...)):
             <section>
                 <form method="post" action="/download" enctype="multipart/form-data">
                     <input type="hidden" name="file_count" value="{len(file_list)}">
+                    <input type="hidden" name="upload_type" value="{upload_type}">
+    """
+    if upload_type == "normal":
+        html_body += """
+                    <table>
+                        <tr>
+                            <th>ファイル名</th>
+                            <th>タイトル</th>
+                        </tr>
+        """
+        for i, file in enumerate(file_list):
+            html_body += f"""
+                        <tr>
+                            <td>{file['filename']}</td>
+                            <td><input type="text" name="title_{i}" value="{file['title']}"></td>
+                            <input type="hidden" name="filename_{i}" value="{file['filename']}">
+                        </tr>
+            """
+    elif upload_type == "sequential":
+        html_body += """
                     <div>
-                        <label><input type="radio" name="stem_edit" value="no" checked> タイトルを個別に編集</label>
-                        <label><input type="radio" name="stem_edit" value="yes"> ファイル名の幹部分を編集</label>
+                        <label>ファイル名の幹部分: <input type="text" name="stem_text"></label>
                     </div>
+                    <table>
+                        <tr>
+                            <th>ファイル名</th>
+                            <th>連番</th>
+                            <th>タイトル</th>
+                        </tr>
+        """
+        for i, file in enumerate(file_list):
+            filename = file["filename"]
+            match = re.match(r"^(.*?)(?:_)?(\d+)\.pdf$", filename)
+            stem = filename
+            number = ""
+            if match:
+                stem = match.group(1)
+                number = match.group(2)
+            html_body += f"""
+                        <tr>
+                            <td>{filename}</td>
+                            <td>{number}</td>
+                            <td><span class="stem">{stem}</span></td>
+                            <input type="hidden" name="title_{i}" value="{stem}">
+                            <input type="hidden" name="filename_{i}" value="{filename}">
+                        </tr>
+            """
+    elif upload_type == "common":
+        html_body += """
                     <div class="common-field">
                         <label>共通語句の追加:</label>
-                        <label><input type="radio" name="common_pos" value="none" checked> なし</label>
-                        <label><input type="radio" name="common_pos" value="prefix"> 先頭</label>
+                        <label><input type="radio" name="common_pos" value="prefix" checked> 先頭</label>
                         <label><input type="radio" name="common_pos" value="middle"> 中央</label>
                         <label><input type="radio" name="common_pos" value="suffix"> 末尾</label>
                         <div class="prefix common-field">
                             <label>先頭語句: <input type="text" name="prefix_text"></label>
                         </div>
-                        <div class="middle common-field">
+                        <div class="middle common-field is-hidden">
                             <label>中央前: <input type="text" name="middle_prefix"></label>
                             <label>中央後: <input type="text" name="middle_suffix"></label>
                         </div>
-                        <div class="suffix common-field">
+                        <div class="suffix common-field is-hidden">
                             <label>末尾語句: <input type="text" name="suffix_text"></label>
                         </div>
                     </div>
@@ -255,28 +359,15 @@ async def upload(files: List[UploadFile] = File(...)):
                             <th>ファイル名</th>
                             <th>タイトル</th>
                         </tr>
-    """
-    for i, file in enumerate(file_list):
-        filename = file["filename"]
-        title = file["title"]
-        # 連番を抽出
-        match = re.match(r"^(.*?)(?:_)?(\d+)\.pdf$", filename)
-        stem = filename
-        number = ""
-        if match:
-            stem = match.group(1)
-            number = match.group(2)
-        html_body += f"""
-                        <tr class="file-row" data-stem="{stem}" data-number="{number}">
-                            <td>{filename}</td>
-                            <td>
-                                <span class="stem">{stem}</span>
-                                <span class="number">{number}</span>
-                                <input type="text" name="title_{i}" value="{title}" class="title-input">
-                            </td>
-                            <input type="hidden" name="filename_{i}" value="{filename}">
-                        </tr>
         """
+        for i, file in enumerate(file_list):
+            html_body += f"""
+                        <tr>
+                            <td>{file['filename']}</td>
+                            <td><input type="text" name="title_{i}" value="{file['title']}"></td>
+                            <input type="hidden" name="filename_{i}" value="{file['filename']}">
+                        </tr>
+            """
     html_body += """
                     </table>
                     <button type="submit" class="download-button">ダウンロード</button>
@@ -287,39 +378,16 @@ async def upload(files: List[UploadFile] = File(...)):
             <div>powered by <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a></div>
         </footer>
         <script>
-            const stemEditRadios = document.querySelectorAll('input[name="stem_edit"]');
             const commonPosRadios = document.querySelectorAll('input[name="common_pos"]');
             const prefixDiv = document.querySelector('.prefix');
             const middleDiv = document.querySelector('.middle');
             const suffixDiv = document.querySelector('.suffix');
-            const rows = document.querySelectorAll('.file-row');
-
-            stemEditRadios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    const useStem = radio.value === 'yes';
-                    rows.forEach(row => {
-                        const stemSpan = row.querySelector('.stem');
-                        const numberSpan = row.querySelector('.number');
-                        const titleInput = row.querySelector('.title-input');
-                        if (useStem) {
-                            stemSpan.style.display = 'inline';
-                            numberSpan.style.display = 'inline';
-                            titleInput.style.display = 'none';
-                            titleInput.value = stemSpan.textContent;
-                        } else {
-                            stemSpan.style.display = 'none';
-                            numberSpan.style.display = 'none';
-                            titleInput.style.display = 'inline';
-                        }
-                    });
-                });
-            });
 
             commonPosRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
-                    prefixDiv.style.display = radio.value === 'prefix' ? 'block' : 'none';
-                    middleDiv.style.display = radio.value === 'middle' ? 'block' : 'none';
-                    suffixDiv.style.display = radio.value === 'suffix' ? 'block' : 'none';
+                    prefixDiv.classList.toggle('is-hidden', radio.value !== 'prefix');
+                    middleDiv.classList.toggle('is-hidden', radio.value !== 'middle');
+                    suffixDiv.classList.toggle('is-hidden', radio.value !== 'suffix');
                 });
             });
         </script>
@@ -332,35 +400,37 @@ async def upload(files: List[UploadFile] = File(...)):
 async def download(request: Request):
     global TEMP_FILES
     form_data = await request.form()
-    print("Received form data:", dict(form_data))
     file_count = int(form_data.get("file_count", 0))
     filenames = [form_data.get(f"filename_{i}") for i in range(file_count)]
     titles = [form_data.get(f"title_{i}") for i in range(file_count)]
-    
-    stem_edit = form_data.get("stem_edit", "no")
-    common_pos = form_data.get("common_pos", "none")
-    prefix_text = form_data.get("prefix_text", "")
-    middle_prefix = form_data.get("middle_prefix", "")
-    middle_suffix = form_data.get("middle_suffix", "")
-    suffix_text = form_data.get("suffix_text", "")
+    upload_type = form_data.get("upload_type", "normal")
     
     processed_titles = []
-    for i, (filename, title) in enumerate(zip(filenames, titles)):
-        if stem_edit == "yes":
+    if upload_type == "normal":
+        processed_titles = titles
+    elif upload_type == "sequential":
+        stem_text = form_data.get("stem_text", "")
+        for filename, title in zip(filenames, titles):
             match = re.match(r"^(.*?)(?:_)?(\d+)\.pdf$", filename)
-            if match:
-                title = match.group(1)
-        final_title = title
-        if common_pos == "prefix" and prefix_text:
-            final_title = prefix_text + final_title
-        elif common_pos == "middle" and middle_prefix and middle_suffix:
-            final_title = middle_prefix + final_title + middle_suffix
-        elif common_pos == "suffix" and suffix_text:
-            final_title += suffix_text
-        processed_titles.append(final_title)
+            number = match.group(2) if match else ""
+            processed_titles.append(f"{stem_text}_{number}" if number else stem_text)
+    elif upload_type == "common":
+        common_pos = form_data.get("common_pos", "prefix")
+        prefix_text = form_data.get("prefix_text", "")
+        middle_prefix = form_data.get("middle_prefix", "")
+        middle_suffix = form_data.get("middle_suffix", "")
+        suffix_text = form_data.get("suffix_text", "")
+        for title in titles:
+            final_title = title
+            if common_pos == "prefix" and prefix_text:
+                final_title = prefix_text + " " + final_title
+            elif common_pos == "middle" and middle_prefix and middle_suffix:
+                final_title = middle_prefix + " " + final_title + " " + middle_suffix
+            elif common_pos == "suffix" and suffix_text:
+                final_title = final_title + " " + suffix_text
+            processed_titles.append(final_title)
     
     if not all(filenames) or not all(processed_titles):
-        print("Error: Missing filenames or titles")
         return HTMLResponse("エラー: ファイル名またはタイトルが欠けています", status_code=400)
     
     zip_buffer = io.BytesIO()
