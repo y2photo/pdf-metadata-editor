@@ -139,7 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const prefixSuffix = document.createElement('div');
             prefixSuffix.classList.add('prefix-suffix');
 
-            prefixSuffix.innerHTML += `
+            prefixSuffix.innerHTML = `
+                <div class="input-group">
+                    <label for="prefix">幹部分：</label>
+                    <input type="text" id="prefix" name="prefix">
+                </div>
                 <div class="input-group">
                     <label>連番の位置：</label>
                     <div class="radio-group">
@@ -149,15 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label for="position-suffix">タイトルの後</label>
                     </div>
                 </div>
-                <div class="input-group prefix-field">
-                    <label for="prefix">幹部分（連番の前）：</label>
-                    <input type="text" id="prefix" name="prefix">
-                </div>
-                <div class="input-group suffix-field is-hidden">
-                    <label for="suffix">幹部分（連番の後）：</label>
-                    <input type="text" id="suffix" name="suffix">
-                </div>
             `;
+
             fileLists[tabId].appendChild(prefixSuffix);
 
             const prefixField = prefixSuffix.querySelector('.prefix-field');
