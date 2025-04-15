@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>PDFメタデータ編集アプリ</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <script src="/static/js/script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>PDFタイトル編集</h1>
+    </header>
+    <main>
+        <section class="instraction">
+            <h2>作業手順</h2>
+            <ul class="item">
+                <li>
+                    <div class="title">
+                        <span class="step">STEP</span>
+                        <span class="no">1</span>
+                    </div>
+                    <p class="subtitle">アップロード</p>
+                    <p class="text">タイトルを修正したいPDFを<br>アップロード</p>
+                </li>
+                <li>
+                    <div class="title">
+                        <span class="step">STEP</span>
+                        <span class="no">2</span>
+                    </div>
+                    <p class="subtitle">タイトル修正</p>
+                    <p class="text">各ファイルのタイトルを<br>書き込み、保存</p>
+                </li>
+                <li>
+                    <div class="title">
+                        <span class="step">STEP</span>
+                        <span class="no">3</span>
+                    </div>
+                    <p class="subtitle">ダウンロード</p>
+                    <p class="text">タイトルを修正したPDFを<br>ダウンロード</p>
+                </li>
+            </ul>
+            <p class="note">※1ファイルのサイズ上限は10MB、最大20ファイルまでアップロード可能です。</p>
+        </section>
+        <section class="tab-container">
+            <div class="tabs">
+                <button class="tab active" data-tab="normal">通常アップロード</button>
+                <button class="tab" data-tab="sequential">連番ファイル</button>
+                <button class="tab" data-tab="common">共通語句</button>
+            </div>
+        
+            <!-- 通常アップロード -->
+            <div class="tab-content active" id="normal">
+                <div class="drop-area" id="drop-area-normal">
+                    <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
+                    <button type="button" class="select-button">選択</button>
+                    <input type="file" id="files-normal" multiple accept="application/pdf" style="display: none;">
+                </div>
+                <form id="form-normal">
+                    <div class="file-list" id="file-list-normal"></div>
+                    <button type="submit" class="upload-button is-hidden" id="edit-normal" disabled>編集してダウンロード</button>
+                </form>
+            </div>
+        
+            <!-- 連番 -->
+            <div class="tab-content" id="sequential">
+                <div class="drop-area" id="drop-area-sequential">
+                    <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
+                    <button type="button" class="select-button">選択</button>
+                    <input type="file" id="files-sequential" multiple accept="application/pdf" style="display: none;">
+                </div>
+                <form id="form-sequential">
+                    <div class="file-list" id="file-list-sequential"></div>
+                    <button type="submit" class="upload-button is-hidden" id="edit-sequential" disabled>編集してダウンロード</button>
+                </form>
+            </div>
+        
+            <!-- 共通語句 -->
+            <div class="tab-content" id="common">
+                <div class="drop-area" id="drop-area-common">
+                    <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
+                    <button type="button" class="select-button">選択</button>
+                    <input type="file" id="files-common" multiple accept="application/pdf" style="display: none;">
+                </div>
+                <form id="form-common">
+                    <div class="file-list" id="file-list-common"></div>
+                    <button type="submit" class="upload-button is-hidden" id="edit-common" disabled>編集してダウンロード</button>
+                </form>
+            </div>
+        </section>
+        
+    </main>
+    <footer>
+        <div>powered by <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a></div>
+    </footer>
+</body>
+</html>
