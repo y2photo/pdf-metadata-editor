@@ -92,11 +92,12 @@ async def upload_sequential(
                 writer.add_page(page)
             full_title = ""
             if prefix:
-                full_title = f"{prefix}{number} {title}"
+                full_title = f"{prefix} {number} {title}"
             elif suffix:
-                full_title = f"{title} {number}{suffix}"
+                full_title = f"{prefix} {title} {number}"
             else:
                 full_title = f"{number} {title}"
+
             writer.add_metadata({"/Title": full_title.strip(), "/Author": AUTHOR})
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
