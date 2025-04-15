@@ -2,7 +2,7 @@ import io
 import zipfile
 import re
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +17,7 @@ templates = Jinja2Templates(directory="templates")
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
 AUTHOR = "丸善雄松堂株式会社"
+JST = timezone(timedelta(hours=9))
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -60,7 +61,7 @@ async def upload_normal(
             zip_file.writestr(file.filename, output_buffer.getvalue())
 
     zip_buffer.seek(0)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    timestamp = datetime.now(JST).strftime("%Y%m%d_%H%M")
     filename = f"modified_pdfs_{timestamp}.zip"
     print(f"Download filename: {filename}")
 
@@ -102,7 +103,7 @@ async def upload_sequential(
             zip_file.writestr(file.filename, output_buffer.getvalue())
 
     zip_buffer.seek(0)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    timestamp = datetime.now(JST).strftime("%Y%m%d_%H%M")
     filename = f"modified_pdfs_{timestamp}.zip"
     print(f"Download filename: {filename}")
 
@@ -148,7 +149,7 @@ async def upload_common(
             zip_file.writestr(filename, output_buffer.getvalue())
 
     zip_buffer.seek(0)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    timestamp = datetime.now(JST).strftime("%Y%m%d_%H%M")
     filename = f"modified_pdfs_{timestamp}.zip"
     print(f"Download filename: {filename}")
 
