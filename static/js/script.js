@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.querySelector(`#file-list-sequential input[name="titles[${index}]"]`).value;
             const number = document.querySelector(`#file-list-sequential input[name="numbers[${index}]"]`).value;
             formData.append('titles', title);
-            formData.append(`numbers[${index}]`, number);
+            formData.append('numbers', number);
         });
         const position = document.querySelector('input[name="position-sequential"]:checked').value;
         const prefix = document.getElementById('prefix').value;
