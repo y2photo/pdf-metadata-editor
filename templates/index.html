@@ -50,7 +50,8 @@
             <div class="tabs">
                 <button class="tab active" data-tab="normal">通常アップロード</button>
                 <button class="tab" data-tab="sequential">連番ファイル</button>
-                <button class="tab" data-tab="common">共通語句</button>
+                <button class="tab" data-tab="common">共通語句あり</button>
+                <button class="tab" data-tab="newrelease">丸善新刊案内PDF</button>
             </div>
         
             <!-- 通常アップロード -->
@@ -91,6 +92,20 @@
                     <button type="submit" class="upload-button is-hidden" id="edit-common" disabled>編集してダウンロード</button>
                 </form>
             </div>
+
+            <!-- 丸善新刊案内PDF -->
+            <div class="tab-content" id="newrelease">
+                <div class="drop-area" id="drop-area-newrelease">
+                    <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
+                    <button type="button" class="select-button">選択</button>
+                    <input type="file" id="files-newrelease" multiple accept="application/pdf" style="display: none;">
+                </div>
+                <form id="form-newrelease">
+                    <div class="file-list" id="file-list-newrelease"></div>
+                    <button type="submit" class="upload-button is-hidden" id="edit-newrelease" disabled>編集してダウンロード</button>
+                </form>
+            </div>
+            
         </section>
         
     </main>

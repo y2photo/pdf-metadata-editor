@@ -7,8 +7,8 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 import pypdf
+import json
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -18,6 +18,21 @@ MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
 AUTHOR = "丸善雄松堂株式会社"
 JST = timezone(timedelta(hours=9))
+
+field_map = {
+    "ALL": "一括ダウンロード",
+    "A": "総記",
+    "B": "人文科学",
+    "C": "社会科学",
+    "D": "理工学",
+    "F": "語学テキスト",
+    "G": "資格試験",
+    "H": "新刊",
+    "J": "文庫",
+    "M": "医学",
+    "N": "資格試験:医学",
+    "P": "新刊:医学"
+}
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -154,5 +169,52 @@ async def upload_common(
     filename = f"modified_pdfs_{timestamp}.zip"
     print(f"Download filename: {filename}")
 
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
+
+@app.post("/upload_newrelease")
+async def upload_newrelease(
+    files: List[UploadFile] = File(...),
+    month: str = Form(...),
+    titles: List[str] = Form(...),
+    filenames: List[str] = Form(...),
+    week: str = Form(...),
+    fields: str = Form(...),
+):
+    if len(files) > MAX_FILES:
+        raise HTTPException(400, detail=f"最大{MAX_FILES}ファイルまで")
+        
+    for file in files:
+        if file.size > MAX_SIZE:
+            raise HTTPException(400, detail=f"{file.filename}は10MBを超えています")
+    
+    field_list = json.loads(fields)
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for i, (file, title, filename) in enumerate(zip(files, titles, filenames)):
+            contents = await file.read()
+            reader = pypdf.PdfReader(io.BytesIO(contents))
+            writer = pypdf.PdfWriter()
+            for page in reader.pages:
+                writer.add_page(page)
+
+        # ✅ ここで週数＋分野を含めたタイトル生成
+            week_part = f"第{week}週" if week else ""
+            full_title = f"丸善新刊案内{month}月 {week_part} {field_list[i]} {title}".strip()
+            # print(full_title)
+
+            writer.add_metadata({
+                "/Title": full_title,
+                "/Author": AUTHOR
+            })
+
+            output_buffer = io.BytesIO()
+            writer.write(output_buffer)
+            zip_file.writestr(filename, output_buffer.getvalue())
+
+    zip_buffer.seek(0)
+    timestamp = datetime.now(JST).strftime("%Y%m%d_%H%M")
+    filename = f"modified_pdfs_{timestamp}.zip"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
