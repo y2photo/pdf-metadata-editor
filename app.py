@@ -38,6 +38,12 @@ field_map = {
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
+@app.get("/faq", response_class=HTMLResponse)
+async def show_faq(request: Request):
+    return templates.TemplateResponse("faq.html", {"request": request})
+
+
 @app.post("/preview_metadata")
 async def preview_metadata(files: List[UploadFile] = File(...)):
     results = []
@@ -50,6 +56,7 @@ async def preview_metadata(files: List[UploadFile] = File(...)):
             title = ""
         results.append({"filename": file.filename, "title": title})
     return JSONResponse(content={"titles": results})
+
 
 @app.post("/upload_normal")
 async def upload_normal(
