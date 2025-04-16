@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         files.normal.forEach(file => formData.append('files', file));
         files.normal.forEach((_, index) => {
             const title = document.querySelector(`#file-list-normal input[name="titles[${index}]"]`).value;
-            formData.append(`titles[${index}]`, title);
+            formData.append('titles', title);
         });
         const response = await fetch('/upload_normal', { method: 'POST', body: formData });
         if (response.ok) {
