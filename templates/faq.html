@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | PDFメタデータ編集ツール</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .faq-item {
+      border-radius: 3px;
+    }
+    .faq-question::after {
+      content: '▼';
+      float: right;
+      transition: transform 0.2s ease;
+    }
+    .faq-question.open::after {
+      transform: rotate(-180deg);
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">よくあるご質問（FAQ）</h1>
+
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-lg font-semibold mb-2">🎓 そもそも</h2>
+        <div class="space-y-4">
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              メタデータって何ですか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              PDFファイルに埋め込まれている「ファイルの裏情報」です。タイトル、作成者、作成日時などが含まれます。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              なぜタイトルを編集する必要があるのですか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              自動生成されたPDFやテンプレートの使い回しでは、内容と関係のないタイトルになっていることがあります。ネット検索でヒットしやすくするため、正しいタイトルの設定は重要です。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-2">🤔 よくある疑問</h2>
+        <div class="space-y-4">
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              作るときに設定しておけばいいのでは？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              もちろんそれが理想ですが、社内ではPDFの作成方法が部署や担当者、掲載先によって異なるため、確実に設定してもらうのは困難というのが実情です。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              あとから変える方法は他にもありますか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              Acrobat Proなどのソフトでも可能ですが、ライセンスを持っている人が限られているため、全員が使えるとは限りません。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              タイトル以外も編集できますか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              本ツールではタイトルのみ編集可能です。作成者（Author）と作成ソフト（Producer）は自動で設定されます。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-2">🔍 実用編</h2>
+        <div class="space-y-4">
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              編集後のPDFのタイトルを確認するには？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              MacではFinderの「情報を見る（Cmd + i）」またはプレビューアプリ、WindowsではPDFをブラウザで開いたときのタブや上部バー、またはAcrobatで確認できます。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              PDFしか編集できませんか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              はい、本ツールではPDFファイルのメタデータ編集にのみ対応しています。Word、Excel、画像などは対象外です。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              パスワード付きのPDFは使えますか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              申し訳ありませんが、パスワードで保護されたPDFファイルには対応しておりません。事前に解除してください。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              ダウンロードまでに時間がかかるのはなぜですか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              メタデータの書き換え処理に多少の時間がかかります。また、サーバーは無料プランのため、起動までにお時間をいただく場合があります。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              ダウンロードされるファイル名は？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              ダウンロードされるファイルは「modified_pdfs_年月日_時刻.zip」という名前で保存されます（例：modified_pdfs_20250416_1320.zip）。
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function toggleFaq(button) {
+      button.classList.toggle('open');
+      const answer = button.nextElementSibling;
+      answer.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>
