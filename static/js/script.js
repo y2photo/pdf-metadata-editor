@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedFiles.forEach((_, index) => {
             const title = document.querySelector(`#file-list-sequential input[name="titles[${index}]"]`).value;
             const number = document.querySelector(`#file-list-sequential input[name="numbers[${index}]"]`).value;
-            formData.append(`titles[${index}]`, title);
+            formData.append('titles', title);
             formData.append(`numbers[${index}]`, number);
         });
         const position = document.querySelector('input[name="position-sequential"]:checked').value;
