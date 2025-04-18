@@ -171,14 +171,14 @@ footer {
 .tab-content {
     display: none;
     padding: 20px;
-    border-top: 5px solid #003894;
-    border-right: 1px solid #999;
-    border-bottom: 1px solid #999;
-    border-left: 1px solid #999;
 }
 
 .tab-content.active {
     display: block;
+    border-top: 5px solid #003894;
+    border-right: 1px solid #999;
+    border-bottom: 1px solid #999;
+    border-left: 1px solid #999;
 }
 
 .drop-area {

@@ -8,10 +8,6 @@
     transition: transform 0.3s;
 }
 
-/* .tab:hover {
-    transform: scale(1.05);
-} */
-
 .prefix-field.is-hidden,
 .suffix-field.is-hidden {
     display: none;
