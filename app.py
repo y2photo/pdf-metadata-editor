@@ -4,7 +4,7 @@ import re
 from typing import List
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
-from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import pypdf
@@ -43,6 +43,9 @@ async def root(request: Request):
 async def show_faq(request: Request):
     return templates.TemplateResponse("faq.html", {"request": request})
 
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse("static/favicon.ico")
 
 @app.post("/preview_metadata")
 async def preview_metadata(files: List[UploadFile] = File(...)):
