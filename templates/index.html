@@ -40,7 +40,7 @@
                         <span class="no">2</span>
                     </div>
                     <p class="subtitle">タイトル修正</p>
-                    <p class="text">各ファイルのタイトルを<br>書き込み、保存</p>
+                    <p class="text">各ファイルのタイトルを<br>フォーム部分に書き込む</p>
                 </li>
                 <li>
                     <div class="title">
@@ -48,11 +48,11 @@
                         <span class="no">3</span>
                     </div>
                     <p class="subtitle">ダウンロード</p>
-                    <p class="text">タイトルを修正したPDFを<br>ダウンロード</p>
+                    <p class="text">タイトルを修正したら<br>編集してダウンロードをクリック</p>
                 </li>
             </ul>
             <p class="note">※1ファイルのサイズ上限は10MB、最大20ファイルまでアップロード可能です。<br>
-            ※ファイルの数や容量によってはダウンロードの画面が表示されるまで数秒〜30秒程度かかることがあります。</p>
+            ※ファイルの数や容量によっては<span style="background: rgba(253, 208, 0, 0.8);font-weight: bold;">ダウンロードの画面が表示されるまで数秒〜数分程度かかる</span>ことがあります。</p>
         </section>
         <section class="tab-container">
             <div class="tabs">
@@ -64,9 +64,10 @@
         
             <!-- 通常アップロード -->
             <div class="tab-content active" id="normal">
+                <p>▶︎１点だけ、もしくは特に揃える要素がない場合にはこちらから</p>
                 <div class="drop-area" id="drop-area-normal">
                     <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
-                    <button type="button" class="select-button">選択</button>
+                    <button type="button" class="select-button">ファイル選択</button>
                     <input type="file" id="files-normal" multiple accept="application/pdf" style="display: none;">
                 </div>
                 <form id="form-normal">
@@ -77,9 +78,10 @@
         
             <!-- 連番 -->
             <div class="tab-content" id="sequential">
+                <p>▶︎連番になっているファイルの連番をそのまま活かしたい場合にはこちらから</p>
                 <div class="drop-area" id="drop-area-sequential">
                     <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
-                    <button type="button" class="select-button">選択</button>
+                    <button type="button" class="select-button">ファイル選択</button>
                     <input type="file" id="files-sequential" multiple accept="application/pdf" style="display: none;">
                 </div>
                 <form id="form-sequential">
@@ -90,9 +92,10 @@
         
             <!-- 共通語句 -->
             <div class="tab-content" id="common">
+                <p>▶︎複数のファイルに同じ文言を入れたい場合にはこちらから</p>
                 <div class="drop-area" id="drop-area-common">
                     <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
-                    <button type="button" class="select-button">選択</button>
+                    <button type="button" class="select-button">ファイル選択</button>
                     <input type="file" id="files-common" multiple accept="application/pdf" style="display: none;">
                 </div>
                 <form id="form-common">
@@ -103,9 +106,10 @@
 
             <!-- 丸善新刊案内PDF -->
             <div class="tab-content" id="newrelease">
+                <p>▶︎丸善新刊案内のPDF専用です</p>
                 <div class="drop-area" id="drop-area-newrelease">
                     <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
-                    <button type="button" class="select-button">選択</button>
+                    <button type="button" class="select-button">ファイル選択</button>
                     <input type="file" id="files-newrelease" multiple accept="application/pdf" style="display: none;">
                 </div>
                 <form id="form-newrelease">

@@ -151,7 +151,7 @@ footer {
 .tab {
     background-color: #e0e0e0;
     color: #003894;
-    border-radius: 3px;
+    border-radius: 3px 3px 0 0;
     padding: 10px 20px;
     cursor: pointer;
     transition: all 0.3s;
@@ -170,7 +170,11 @@ footer {
 
 .tab-content {
     display: none;
-    padding: 20px 0;
+    padding: 20px;
+    border-top: 5px solid #003894;
+    border-right: 1px solid #999;
+    border-bottom: 1px solid #999;
+    border-left: 1px solid #999;
 }
 
 .tab-content.active {
