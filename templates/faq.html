@@ -89,14 +89,14 @@
       <div>
         <h2 class="text-lg font-semibold mb-2">📝 使い方実践編</h2>
         <div class="space-y-4">
+
           <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
             <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
-              編集後のPDFのタイトルを確認するには？
+              間違って別のファイルをアップロードしてしまいました！
             </button>
             <div class="faq-answer mt-2 text-sm hidden">
-              MacではFinderの「情報を見る（Cmd + i）」またはプレビューアプリ、<br>
-              WindowsではPDFをブラウザ（<span style="background: rgba(253, 208, 0, 0.8);font-weight: bold;">ChromeかFirefox推奨。Edgeでは表示されません</span>）で開いた時の画面左上、<br>
-              またはどちらのOSでもAdobe Acrobatで確認できます。
+              各タブの状態はリロードすることで初期化されます。<br>
+              ファイルの選択をやり直したい場合は、ブラウザをリロード（更新）してください。
             </div>
           </div>
 
@@ -122,6 +122,17 @@
 
           <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
             <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              ファイル名とタイトルらしいものが自動で入力されているのはなぜですか？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              アップロードしたPDFファイルにタイトルのメタデータが含まれている場合、<br>
+              自動で取得・表示、含まれていない場合にはファイル名となります。<br>
+              表示させたいタイトル(日本語使用可)で上書きすることで変更が可能です。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
               ダウンロードまでに時間がかかるのはなぜですか？
             </button>
             <div class="faq-answer mt-2 text-sm hidden">
@@ -136,6 +147,17 @@
             </button>
             <div class="faq-answer mt-2 text-sm hidden">
               ダウンロードされるファイルは「modified_pdfs_年月日_時刻.zip」という名前で保存されます<br>（例：modified_pdfs_20250416_1320.zip）。
+            </div>
+          </div>
+
+          <div class="faq-item bg-white border border-gray-300 shadow-sm p-4">
+            <button class="faq-question text-left w-full font-semibold text-base" onclick="toggleFaq(this)">
+              編集後のPDFのタイトルを確認するには？
+            </button>
+            <div class="faq-answer mt-2 text-sm hidden">
+              MacではFinderの「情報を見る（Cmd + i）」またはプレビューアプリ、<br>
+              WindowsではPDFをブラウザ（<span style="background: rgba(253, 208, 0, 0.8);font-weight: bold;">ChromeかFirefox推奨。Edgeでは表示されません</span>）で開いた時の画面左上、<br>
+              またはどちらのOSでもAdobe Acrobatで確認できます。
             </div>
           </div>
 
