@@ -91,7 +91,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateEditButtonState(tabId) {
         editButtons[tabId].disabled = files[tabId].length === 0;
     }
-    // === script.js（完全統合・全タブ対応版 Part 2 / 4）===
+
+    function showTemporaryMessage(tabId, message) {
+        const dropArea = document.getElementById(`drop-area-${tabId}`);
+        const originalText = dropArea.innerHTML;
+    
+        dropArea.innerHTML = `<p class="upload-complete">${message}</p>`;
+        dropArea.classList.remove('is-hidden');
+    
+        setTimeout(() => {
+            dropArea.innerHTML = originalText;
+            dropArea.classList.add('is-hidden');
+            resetToNormalTab();
+        }, 2000);
+    }
+    
+    function resetToNormalTab() {
+        // すべてのタブを非アクティブに
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+    
+        // normalタブをアクティブに
+        document.querySelector('.tab[data-tab="normal"]').classList.add('active');
+        document.getElementById('normal').classList.add('active');
+    }
+    
+    // === タブ切り替え設定===
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -333,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // === script.js（完全統合・全タブ対応版 Part 4 / 4）===
+    // === ドロップエリアの動作設定 ===
 
     dropAreas.forEach(dropArea => {
         const tabId = dropArea.id.split('-')[2];
@@ -402,43 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        
-            // 👇 完了メッセージ → 2秒後に normal タブに戻す
-            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
-        
-            function resetToNormalTab() {
-                // タブ切り替え
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-            
-                // 通常タブをアクティブ化
-                const normalTab = document.querySelector('.tab[data-tab="normal"]');
-                const normalContent = document.getElementById('normal');
-                normalTab.classList.add('active');
-                normalContent.classList.add('active');
-            
-                // ファイルリストとボタンをリセット
-                renderFileList('normal');
-                updateEditButtonState('normal');
-            }
-            setTimeout(() => {
-                try {
-                    if (files[tabId]) files[tabId] = [];
-                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
-        
-                    // ✅ タブ切り替え
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
-                    document.getElementById('normal').classList.add('active');
-        
-                    // ✅ 通常タブの初期化
-                    renderFileList('normal');
-                    updateEditButtonState('normal');
-                } catch (err) {
-                    console.error('reset error:', err);
-                }
-            }, 2000);
+
+            files.normal = [];
+            renderFileList('normal');
+            updateEditButtonState('normal');
+
         } else {
             alert('アップロードに失敗しました。');
         }       
@@ -472,44 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        
-            // 👇 完了メッセージ → 2秒後に normal タブに戻す
-            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
-        
-            function resetToNormalTab() {
-                // タブ切り替え
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-            
-                // 通常タブをアクティブ化
-                const normalTab = document.querySelector('.tab[data-tab="normal"]');
-                const normalContent = document.getElementById('normal');
-                normalTab.classList.add('active');
-                normalContent.classList.add('active');
-            
-                // ファイルリストとボタンをリセット
-                renderFileList('normal');
-                updateEditButtonState('normal');
-            }
 
-            setTimeout(() => {
-                try {
-                    if (files[tabId]) files[tabId] = [];
-                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
-        
-                    // ✅ タブ切り替え
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
-                    document.getElementById('normal').classList.add('active');
-        
-                    // ✅ 通常タブの初期化
-                    renderFileList('normal');
-                    updateEditButtonState('normal');
-                } catch (err) {
-                    console.error('reset error:', err);
-                }
-            }, 2000);
+            files.sequential = [];
+            renderFileList('sequential');
+            updateEditButtonState('sequential');
+
         } else {
             alert('アップロードに失敗しました。');
         }
@@ -543,44 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        
-            // 👇 完了メッセージ → 2秒後に normal タブに戻す
-            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
-        
-            function resetToNormalTab() {
-                // タブ切り替え
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-            
-                // 通常タブをアクティブ化
-                const normalTab = document.querySelector('.tab[data-tab="normal"]');
-                const normalContent = document.getElementById('normal');
-                normalTab.classList.add('active');
-                normalContent.classList.add('active');
-            
-                // ファイルリストとボタンをリセット
-                renderFileList('normal');
-                updateEditButtonState('normal');
-            }
 
-            setTimeout(() => {
-                try {
-                    if (files[tabId]) files[tabId] = [];
-                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
-        
-                    // ✅ タブ切り替え
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
-                    document.getElementById('normal').classList.add('active');
-        
-                    // ✅ 通常タブの初期化
-                    renderFileList('normal');
-                    updateEditButtonState('normal');
-                } catch (err) {
-                    console.error('reset error:', err);
-                }
-            }, 2000);
+            files.common = [];
+            renderFileList('common');
+            updateEditButtonState('common');
         } else {
             alert('アップロードに失敗しました。');
         }    
@@ -633,48 +559,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            // files.newrelease = [];
+            files.newrelease = [];
             metadataTitles.newrelease = [];
-            // renderNewreleaseList();
-            // updateEditButtonState('newrelease');
-        
-            // 👇 完了メッセージ → 2秒後に normal タブに戻す
-            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
-
-            function resetToNormalTab() {
-                // タブ切り替え
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-        
-                // 通常タブをアクティブ化
-                const normalTab = document.querySelector('.tab[data-tab="normal"]');
-                const normalContent = document.getElementById('normal');
-                normalTab.classList.add('active');
-                normalContent.classList.add('active');
-                
-                // ファイルリストとボタンをリセット
-                renderFileList('normal');
-                updateEditButtonState('normal');
-            }
-
-            setTimeout(() => {
-                try {
-                    if (files[tabId]) files[tabId] = [];
-                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
-        
-                    // ✅ タブ切り替え
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
-                    document.getElementById('normal').classList.add('active');
-        
-                    // ✅ 通常タブの初期化
-                    renderFileList('normal');
-                    updateEditButtonState('normal');
-                } catch (err) {
-                    console.error('reset error:', err);
-                }
-            }, 2000);
+            renderNewreleaseList();
+            updateEditButtonState('newrelease');
         } catch (error) {
             alert('ネットワークエラーが発生しました。');
         }
