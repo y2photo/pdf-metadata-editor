@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (response.ok) {
                 const json = await response.json();
-                metadataTitles[tabId] = json;
+                metadataTitles[tabId] = json.titles;
             }
         } catch (error) {
             console.error('メタデータ取得エラー:', error);
@@ -67,6 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return parseInt(numA, 10) - parseInt(numB, 10);
         });
     }
+
+    function showTemporaryMessage(tabId, message) {
+        const fileList = document.getElementById(`file-list-${tabId}`);
+        if (!fileList) return;
+        fileList.innerHTML = '';
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = message;
+        msgDiv.classList.add('download-complete-message');
+        fileList.appendChild(msgDiv);
+    }
+
+    function getTimestamp() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const h = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        return `${y}${m}${d}_${h}${min}`;
+    }    
 
     function updateEditButtonState(tabId) {
         editButtons[tabId].disabled = files[tabId].length === 0;
@@ -121,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const meta = list.find(item => item.filename === filename);
         return meta?.title || filename.replace(/\.pdf$/, '');
     }
-    // === script.js（完全統合・全タブ対応版 Part 3 / 4）===
 
     function renderFileList(tabId) {
         fileLists[tabId].innerHTML = '';
@@ -361,6 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+
+    // === 通常タブ　===
+
     forms.normal.addEventListener('submit', async e => {
         e.preventDefault();
         const formData = new FormData();
@@ -375,18 +397,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modified_pdfs.zip';
+            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            files.normal = [];
-            renderFileList('normal');
-            updateEditButtonState('normal');
+        
+            // 👇 完了メッセージ → 2秒後に normal タブに戻す
+            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
+        
+            function resetToNormalTab() {
+                // タブ切り替え
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+            
+                // 通常タブをアクティブ化
+                const normalTab = document.querySelector('.tab[data-tab="normal"]');
+                const normalContent = document.getElementById('normal');
+                normalTab.classList.add('active');
+                normalContent.classList.add('active');
+            
+                // ファイルリストとボタンをリセット
+                renderFileList('normal');
+                updateEditButtonState('normal');
+            }
+            setTimeout(() => {
+                try {
+                    if (files[tabId]) files[tabId] = [];
+                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
+        
+                    // ✅ タブ切り替え
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
+                    document.getElementById('normal').classList.add('active');
+        
+                    // ✅ 通常タブの初期化
+                    renderFileList('normal');
+                    updateEditButtonState('normal');
+                } catch (err) {
+                    console.error('reset error:', err);
+                }
+            }, 2000);
         } else {
             alert('アップロードに失敗しました。');
-        }
+        }       
     });
+
+    // === 連番タブ　===
 
     forms.sequential.addEventListener('submit', async e => {
         e.preventDefault();
@@ -409,18 +467,56 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modified_sequential_pdfs.zip';
+            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            files.sequential = [];
-            renderFileList('sequential');
-            updateEditButtonState('sequential');
+        
+            // 👇 完了メッセージ → 2秒後に normal タブに戻す
+            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
+        
+            function resetToNormalTab() {
+                // タブ切り替え
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+            
+                // 通常タブをアクティブ化
+                const normalTab = document.querySelector('.tab[data-tab="normal"]');
+                const normalContent = document.getElementById('normal');
+                normalTab.classList.add('active');
+                normalContent.classList.add('active');
+            
+                // ファイルリストとボタンをリセット
+                renderFileList('normal');
+                updateEditButtonState('normal');
+            }
+
+            setTimeout(() => {
+                try {
+                    if (files[tabId]) files[tabId] = [];
+                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
+        
+                    // ✅ タブ切り替え
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
+                    document.getElementById('normal').classList.add('active');
+        
+                    // ✅ 通常タブの初期化
+                    renderFileList('normal');
+                    updateEditButtonState('normal');
+                } catch (err) {
+                    console.error('reset error:', err);
+                }
+            }, 2000);
         } else {
             alert('アップロードに失敗しました。');
         }
     });
+
+
+    // === 共通語句タブ　===
 
     forms.common.addEventListener('submit', async e => {
         e.preventDefault();
@@ -442,18 +538,57 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modified_common_pdfs.zip';
+            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            files.common = [];
-            renderFileList('common');
-            updateEditButtonState('common');
+        
+            // 👇 完了メッセージ → 2秒後に normal タブに戻す
+            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
+        
+            function resetToNormalTab() {
+                // タブ切り替え
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+            
+                // 通常タブをアクティブ化
+                const normalTab = document.querySelector('.tab[data-tab="normal"]');
+                const normalContent = document.getElementById('normal');
+                normalTab.classList.add('active');
+                normalContent.classList.add('active');
+            
+                // ファイルリストとボタンをリセット
+                renderFileList('normal');
+                updateEditButtonState('normal');
+            }
+
+            setTimeout(() => {
+                try {
+                    if (files[tabId]) files[tabId] = [];
+                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
+        
+                    // ✅ タブ切り替え
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
+                    document.getElementById('normal').classList.add('active');
+        
+                    // ✅ 通常タブの初期化
+                    renderFileList('normal');
+                    updateEditButtonState('normal');
+                } catch (err) {
+                    console.error('reset error:', err);
+                }
+            }, 2000);
         } else {
             alert('アップロードに失敗しました。');
-        }
+        }    
     });
+
+
+    // === 丸善新刊案内タブ　===
+
     formNew.addEventListener('submit', async e => {
         console.log("Submitting formNew");
         e.preventDefault();
@@ -492,16 +627,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
+            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            files.newrelease = [];
+            // files.newrelease = [];
             metadataTitles.newrelease = [];
-            renderNewreleaseList();
-            updateEditButtonState('newrelease');
+            // renderNewreleaseList();
+            // updateEditButtonState('newrelease');
+        
+            // 👇 完了メッセージ → 2秒後に normal タブに戻す
+            showTemporaryMessage(tabId, 'ダウンロードが完了しました');
+
+            function resetToNormalTab() {
+                // タブ切り替え
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+        
+                // 通常タブをアクティブ化
+                const normalTab = document.querySelector('.tab[data-tab="normal"]');
+                const normalContent = document.getElementById('normal');
+                normalTab.classList.add('active');
+                normalContent.classList.add('active');
+                
+                // ファイルリストとボタンをリセット
+                renderFileList('normal');
+                updateEditButtonState('normal');
+            }
+
+            setTimeout(() => {
+                try {
+                    if (files[tabId]) files[tabId] = [];
+                    if (metadataTitles[tabId]) metadataTitles[tabId] = [];
+        
+                    // ✅ タブ切り替え
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="normal"]').classList.add('active');
+                    document.getElementById('normal').classList.add('active');
+        
+                    // ✅ 通常タブの初期化
+                    renderFileList('normal');
+                    updateEditButtonState('normal');
+                } catch (err) {
+                    console.error('reset error:', err);
+                }
+            }, 2000);
         } catch (error) {
             alert('ネットワークエラーが発生しました。');
         }
