@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const formNew = document.getElementById('form-newrelease');
 
-
     let files = { normal: [], sequential: [], common: [], newrelease: [] };
     let metadataTitles = { normal: [], sequential: [], common: [], newrelease: [] };
     let week = '';  // ← グローバルで定義
@@ -45,6 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('メタデータ取得エラー:', error);
+        }
+    }
+
+    async function fetchMetadataTitles(fileList) {
+        const formData = new FormData();
+        fileList.forEach(file => formData.append('files', file));
+        try {
+            const res = await fetch('/preview_metadata', {
+                method: 'POST',
+                body: formData
+            });
+            const json = await res.json();
+            return json.titles.map(item => item.title || '');
+        } catch (error) {
+            console.warn('メタデータ取得に失敗しました');
+            return fileList.map(_ => '');
         }
     }
 
@@ -68,52 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function showTemporaryMessage(tabId, message) {
-        const fileList = document.getElementById(`file-list-${tabId}`);
-        if (!fileList) return;
-        fileList.innerHTML = '';
-        const msgDiv = document.createElement('div');
-        msgDiv.textContent = message;
-        msgDiv.classList.add('download-complete-message');
-        fileList.appendChild(msgDiv);
-    }
-
-    function getTimestamp() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        const h = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        return `${y}${m}${d}_${h}${min}`;
-    }    
-
     function updateEditButtonState(tabId) {
         editButtons[tabId].disabled = files[tabId].length === 0;
-    }
-
-    function showTemporaryMessage(tabId, message) {
-        const dropArea = document.getElementById(`drop-area-${tabId}`);
-        const originalText = dropArea.innerHTML;
-    
-        dropArea.innerHTML = `<p class="upload-complete">${message}</p>`;
-        dropArea.classList.remove('is-hidden');
-    
-        setTimeout(() => {
-            dropArea.innerHTML = originalText;
-            dropArea.classList.add('is-hidden');
-            resetToNormalTab();
-        }, 2000);
-    }
-    
-    function resetToNormalTab() {
-        // すべてのタブを非アクティブに
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-    
-        // normalタブをアクティブに
-        document.querySelector('.tab[data-tab="normal"]').classList.add('active');
-        document.getElementById('normal').classList.add('active');
     }
     
     // === タブ切り替え設定===
@@ -132,6 +103,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    function getMetadataTitleForFile(tabId, filename) {
+        const list = Array.isArray(metadataTitles[tabId]) ? metadataTitles[tabId] : [];
+        const meta = list.find(item => item.filename === filename);
+        return meta?.title || filename.replace(/\.pdf$/, '');
+    }
+
+    function getTimestamp() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const h = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        return `${y}${m}${d}_${h}${min}`;
+    }  
+
+
+    // === 丸善新刊案内用設定===
+
+    // アルファベットと分野の対応
+
     const fieldMap = {
         ALL: "一括ダウンロード",
         A: "総記",
@@ -147,6 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
         P: "新刊:医学"
     };
 
+    // 週数取得
+
     function extractWeekChar(filename) {
         const match = filename.match(/(\d{2})-[A-Z]/);
         if (match) {
@@ -155,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return '';
     }
+
+    // All先頭でアルファベット順に
 
     function extractAlpha(filename) {
         const match = filename.match(/(?:\d{2}-)?(ALL|[A-Z]{1,3})(?=\.|-)/);
@@ -167,6 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return meta?.title || filename.replace(/\.pdf$/, '');
     }
 
+
+    // === 通常・連番・共通語句のファイル一覧表示設定===
+
     function renderFileList(tabId) {
         fileLists[tabId].innerHTML = '';
         const dropArea = document.getElementById(`drop-area-${tabId}`);
@@ -177,113 +176,210 @@ document.addEventListener('DOMContentLoaded', () => {
             editButton.classList.add('is-hidden');
             return;
         }
+
         dropArea.classList.add('is-hidden');
         editButton.classList.remove('is-hidden');
 
         if (tabId === 'sequential') {
+            const existing = fileLists[tabId].querySelector('.prefix-suffix');
+            if (existing) fileLists[tabId].removeChild(existing);
+
             const prefixSuffix = document.createElement('div');
             prefixSuffix.classList.add('prefix-suffix');
+
             prefixSuffix.innerHTML = `
-            <div class="input-group">
-                <label for="prefix">幹部分：</label>
-                <input type="text" id="prefix" name="prefix">
-            </div>
-            <div class="input-group">
-                <label>タイトルの位置：</label>
-                <div class="radio-group">
-                    <input type="radio" id="position-prefix" name="position-sequential" value="prefix" checked>
-                    <label for="position-prefix">タイトルの前</label>
-                    <input type="radio" id="position-suffix" name="position-sequential" value="suffix">
-                    <label for="position-suffix">タイトルの後</label>
+                <div class="input-group">
+                    <label for="prefix">幹部分：</label>
+                    <input type="text" id="prefix" name="prefix">
                 </div>
-            </div>
-        `;
+                <div class="input-group">
+                    <label>連番の位置：</label>
+                    <div class="radio-group">
+                        <input type="radio" id="position-prefix" name="position-sequential" value="prefix" checked>
+                        <label for="position-prefix">タイトルの前</label>
+                        <input type="radio" id="position-suffix" name="position-sequential" value="suffix">
+                        <label for="position-suffix">タイトルの後</label>
+                    </div>
+                </div>
+            `;
+
             fileLists[tabId].appendChild(prefixSuffix);
-        } else if (tabId === 'common') {
-            const commonControls = document.createElement('div');
-            commonControls.classList.add('common-controls');
-            commonControls.innerHTML = `
-            <div class="input-group">
-                <label for="common-phrase">共通語句：</label>
-                <input type="text" id="common-phrase" name="common-phrase">
-            </div>
-            <div class="input-group radio-group">
-                <label>位置：</label>
-                <input type="radio" id="position-start" name="position" value="start" checked>
-                <label for="position-start">先頭</label>
-                <input type="radio" id="position-middle" name="position" value="middle">
-                <label for="position-middle">中央</label>
-                <input type="radio" id="position-end" name="position" value="end">
-                <label for="position-end">末尾</label>
-            </div>
-        `;
-            fileLists[tabId].appendChild(commonControls);
+
+            const prefixField = prefixSuffix.querySelector('.prefix-field');
+            const suffixField = prefixSuffix.querySelector('.suffix-field');
+            const positionRadios = prefixSuffix.querySelectorAll('input[name="position-sequential"]');
+            positionRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    prefixField.classList.toggle('is-hidden', radio.value !== 'prefix');
+                    suffixField.classList.toggle('is-hidden', radio.value !== 'suffix');
+                });
+            });
         }
+
+        if (tabId === 'common') {
+            const existingControls = fileLists[tabId].querySelector('.common-controls');
+            if (existingControls) {
+                fileLists[tabId].removeChild(existingControls);
+            }
+
+            const commonControlsWrapper = document.createElement('div');
+            commonControlsWrapper.classList.add('common-controls');
+
+            const phraseGroup = document.createElement('div');
+            phraseGroup.classList.add('input-group');
+            const phraseLabel = document.createElement('label');
+            phraseLabel.setAttribute('for', 'common-phrase');
+            phraseLabel.textContent = '共通語句：';
+            const phraseInput = document.createElement('input');
+            phraseInput.type = 'text';
+            phraseInput.id = 'common-phrase';
+            phraseInput.name = 'common-phrase';
+            phraseGroup.appendChild(phraseLabel);
+            phraseGroup.appendChild(phraseInput);
+
+            const radioGroupWrapper = document.createElement('div');
+            radioGroupWrapper.classList.add('input-group', 'radio-group');
+
+            const positionLabel = document.createElement('label');
+            positionLabel.textContent = '語句の位置：';
+            radioGroupWrapper.appendChild(positionLabel);
+
+            const positions = [
+                { id: 'position-start', value: 'start', label: '先頭' },
+                { id: 'position-middle', value: 'middle', label: '中央' },
+                { id: 'position-end', value: 'end', label: '末尾' }
+            ];
+
+            positions.forEach(pos => {
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.id = pos.id;
+                input.name = 'position';
+                input.value = pos.value;
+
+                // 選択状態の復元：DOMが再生成された後も維持
+                if (pos.value === window.currentPosition) {
+                    input.checked = true;
+                } else if (!window.currentPosition && pos.value === 'start') {
+                    input.checked = true;
+                    window.currentPosition = 'start';
+                }
+
+                const label = document.createElement('label');
+                label.setAttribute('for', pos.id);
+                label.textContent = pos.label;
+
+                radioGroupWrapper.appendChild(input);
+                radioGroupWrapper.appendChild(label);
+            });
+
+            commonControlsWrapper.appendChild(phraseGroup);
+            commonControlsWrapper.appendChild(radioGroupWrapper);
+            fileLists[tabId].appendChild(commonControlsWrapper);
+
+            const positionRadios = radioGroupWrapper.querySelectorAll('input[name="position"]');
+            positionRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    window.currentPosition = radio.value;
+                    renderFileList(tabId);
+                });
+            });
+        }
+
+        const sortedFiles = tabId === 'sequential'
+            ? sortFilesByNumber([...files[tabId]])
+            : files[tabId];
 
         const table = document.createElement('table');
         const thead = document.createElement('thead');
         const trHead = document.createElement('tr');
-        const headers = tabId === 'sequential' ?
-            ['ファイル名', 'タイトル', '番号'] :
-            ['ファイル名', tabId === 'common' ? '可変部分' : 'タイトル'];
-        headers.forEach((text, index) => {
+        const headers = tabId === 'sequential'
+            ? ['ファイル名', 'タイトル', '番号']
+            : ['ファイル名', 'タイトル'];
+        headers.forEach(text => {
             const th = document.createElement('th');
+            
             th.textContent = text;
-            th.classList.add(index === 0 ? 'filename' : index === 1 ? 'title' : 'number');
+
             trHead.appendChild(th);
         });
         thead.appendChild(trHead);
         table.appendChild(thead);
+
         const tbody = document.createElement('tbody');
 
-        const sortedFiles = tabId === 'sequential' ? sortFilesByNumber([...files[tabId]]) : files[tabId];
         sortedFiles.forEach((file, index) => {
             const tr = document.createElement('tr');
+
             const tdName = document.createElement('td');
             tdName.textContent = file.name;
             tr.appendChild(tdName);
 
             const tdTitle = document.createElement('td');
-            const inputWrapper = document.createElement('div');
-            inputWrapper.classList.add('input-wrapper');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = `titles[${index}]`;
-            input.value = getMetadataTitleForFile(tabId, file.name);
-            inputWrapper.appendChild(input);
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('input-wrapper');
 
-            if (tabId === 'sequential') {
-                const numberInput = document.createElement('input');
-                numberInput.type = 'text';
-                numberInput.name = `numbers[${index}]`;
-                numberInput.classList.add('number');
-                numberInput.value = extractNumber(file.name);
-                inputWrapper.appendChild(numberInput);
-            }
+            const metadataTitle = metadataTitles[tabId][index] || '';
+            const fallbackTitle = file.name.replace(/\d{6}_/g, '').replace('.pdf', '');
 
             if (tabId === 'common') {
+                const position = document.querySelector('input[name="position"]:checked')?.value || 'start';
+                if (position === 'middle') {
+                    const input1 = document.createElement('input');
+                    input1.type = 'text';
+                    input1.name = `title-part1-${index}`;
+                    input1.placeholder = 'タイトル前半';
+                    input1.value = '';
+                    const input2 = document.createElement('input');
+                    input2.type = 'text';
+                    input2.name = `title-part2-${index}`;
+                    input2.placeholder = 'タイトル後半';
+                    input2.value = '';
+                    wrapper.appendChild(input1);
+                    wrapper.appendChild(input2);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = `titles[${index}]`;
+                    input.value = metadataTitle || fallbackTitle;
+                    wrapper.appendChild(input);
+                }
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = `filenames[${index}]`;
                 hiddenInput.value = file.name;
-                inputWrapper.appendChild(hiddenInput);
+                wrapper.appendChild(hiddenInput);
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = `titles[${index}]`;
+                input.value = metadataTitle || fallbackTitle;
+                wrapper.appendChild(input);
             }
 
-            tdTitle.appendChild(inputWrapper);
+            tdTitle.appendChild(wrapper);
             tr.appendChild(tdTitle);
 
             if (tabId === 'sequential') {
                 const tdNumber = document.createElement('td');
                 tdNumber.classList.add('number');
-                tdNumber.textContent = extractNumber(file.name);
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = `number[${index}]`;
+                input.value = extractNumber(file.name);
+                tdNumber.appendChild(input);
                 tr.appendChild(tdNumber);
             }
+
             tbody.appendChild(tr);
         });
+
         table.appendChild(tbody);
         fileLists[tabId].appendChild(table);
     }
 
+    // === 丸善新刊案内タブのファイル一覧表示設定 ===
+    
     function renderNewreleaseList() {
         const fileListNew = document.getElementById('file-list-newrelease');
         const dropAreaNew = document.getElementById('drop-area-newrelease');
@@ -365,16 +461,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const fileInput = document.getElementById(`files-${tabId}`);
         const selectButton = dropArea.querySelector('.select-button');
 
-        selectButton.addEventListener('click', () => fileInput.click());
+        selectButton.addEventListener('click', () => {
+            fileInput.click();
+        });
 
         fileInput.addEventListener('change', async () => {
-            const selectedFiles = Array.from(fileInput.files).filter(f => f.type === 'application/pdf');
+            const selectedFiles = Array.from(fileInput.files).filter(
+                f => f.type === 'application/pdf' && f.size <= 10 * 1024 * 1024
+            );
             if (files[tabId].length + selectedFiles.length > 20) {
                 alert('最大20ファイルまでです');
                 return;
             }
             files[tabId].push(...selectedFiles);
-            await loadMetadataTitles(tabId);
+            metadataTitles[tabId].push(...await loadMetadataTitles(selectedFiles));
+            renderFileList(tabId);
             tabId === 'newrelease' ? renderNewreleaseList() : renderFileList(tabId);
             updateEditButtonState(tabId);
             fileInput.value = '';
@@ -384,27 +485,31 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             dropArea.classList.add('dragover');
         });
+
         dropArea.addEventListener('dragleave', () => {
             dropArea.classList.remove('dragover');
         });
+
         dropArea.addEventListener('drop', async e => {
             e.preventDefault();
             dropArea.classList.remove('dragover');
             dropArea.classList.add('uploading');
-            const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+            const droppedFiles = Array.from(e.dataTransfer.files).filter(
+                f => f.type === 'application/pdf' && f.size <= 10 * 1024 * 1024
+            );
             if (files[tabId].length + droppedFiles.length > 20) {
                 alert('最大20ファイルまでです');
                 dropArea.classList.remove('uploading');
                 return;
             }
             files[tabId].push(...droppedFiles);
-            await loadMetadataTitles(tabId);
+            metadataTitles[tabId].push(...await fetchMetadataTitles(droppedFiles));
+            renderFileList(tabId);
             tabId === 'newrelease' ? renderNewreleaseList() : renderFileList(tabId);
             updateEditButtonState(tabId);
             setTimeout(() => dropArea.classList.remove('uploading'), 500);
         });
     });
-
 
     // === 通常タブ　===
 
@@ -416,25 +521,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.querySelector(`#file-list-normal input[name="titles[${index}]"]`).value;
             formData.append('titles', title);
         });
-        const response = await fetch('/upload_normal', { method: 'POST', body: formData });
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-
-            files.normal = [];
-            renderFileList('normal');
-            updateEditButtonState('normal');
-
-        } else {
-            alert('アップロードに失敗しました。');
-        }       
+    
+        try {
+            const response = await fetch('/upload_normal', { method: 'POST', body: formData });
+            if (response.ok) {
+                const disposition = response.headers.get("Content-Disposition");
+                let filename = "download.zip";
+                if (disposition && disposition.includes("filename=")) {
+                    const match = disposition.match(/filename="(.+?)"/);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                }
+    
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+    
+                files.normal = [];
+                metadataTitles.normal = [];
+                renderFileList('normal');
+                updateEditButtonState('normal');
+            } else {
+                alert('アップロードに失敗しました。');
+            }
+        } catch (error) {
+            alert('ネットワークエラーが発生しました。');
+        }
     });
 
     // === 連番タブ　===
@@ -443,35 +562,53 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const formData = new FormData();
         const sortedFiles = sortFilesByNumber([...files.sequential]);
+    
         sortedFiles.forEach(file => formData.append('files', file));
         sortedFiles.forEach((_, index) => {
-            const title = document.querySelector(`#file-list-sequential input[name="titles[${index}]"]`).value;
-            const number = document.querySelector(`#file-list-sequential input[name="numbers[${index}]"]`).value;
+            const title = document.querySelector(`#file-list-sequential input[name="titles[${index}]"]`)?.value || '';
+            const number = document.querySelector(`#file-list-sequential input[name="number[${index}]"]`)?.value || '';
             formData.append('titles', title);
             formData.append('numbers', number);
         });
-        const position = document.querySelector('input[name="position-sequential"]:checked').value;
-        const prefix = document.getElementById('prefix').value;
+    
+        const position = document.querySelector('input[name="position-sequential"]:checked')?.value || 'prefix';
+        const prefix = position === 'prefix' ? document.getElementById('prefix').value : '';
+        const suffix = position === 'suffix' ? document.getElementById('suffix').value : '';
         formData.append('prefix', prefix);
-        formData.append('position', position);
-        const response = await fetch('/upload_sequential', { method: 'POST', body: formData });
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-
-            files.sequential = [];
-            renderFileList('sequential');
-            updateEditButtonState('sequential');
-
-        } else {
-            alert('アップロードに失敗しました。');
+        formData.append('suffix', suffix);
+    
+        try {
+            const response = await fetch('/upload_sequential', { method: 'POST', body: formData });
+            if (response.ok) {
+                const disposition = response.headers.get("Content-Disposition");
+                let filename = "download.zip";
+                if (disposition && disposition.includes("filename=")) {
+                    const match = disposition.match(/filename="(.+?)"/);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                }
+    
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+    
+                files.sequential = [];
+                metadataTitles.sequential = [];
+                renderFileList('sequential');
+                updateEditButtonState('sequential');
+            } else {
+                const errorText = await response.text();
+                alert('アップロードに失敗しました。詳細: ' + errorText);
+            }
+        } catch (error) {
+            alert('ネットワークエラーが発生しました。');
         }
     });
 
@@ -481,35 +618,71 @@ document.addEventListener('DOMContentLoaded', () => {
     forms.common.addEventListener('submit', async e => {
         e.preventDefault();
         const formData = new FormData();
+        const position = document.querySelector('input[name="position"]:checked')?.value || 'start';
+        const commonPhrase = document.getElementById('common-phrase').value || '';
         files.common.forEach(file => formData.append('files', file));
+    
         files.common.forEach((_, index) => {
-            const title = document.querySelector(`#file-list-common input[name="titles[${index}]"]`).value;
-            const filename = document.querySelector(`#file-list-common input[name="filenames[${index}]"]`).value;
+            let title = '';
+            // const title = document.querySelector(`#file-list-common input[name="titles[${index}]"]`).value;
+            // const filename = document.querySelector(`#file-list-common input[name="filenames[${index}]"]`).value;
+            if (position === 'middle') {
+                const part1 = document.querySelector(`#file-list-common input[name="title-part1-${index}"]`)?.value || '';
+                const part2 = document.querySelector(`#file-list-common input[name="title-part2-${index}"]`)?.value || '';
+                title = `${part1}|||${part2}`;
+            } else {
+                const titleInput = document.querySelector(`#file-list-common input[name="titles[${index}]"]`)
+                // title = document.querySelector(`#file-list-common input[name="titles[${index}]"]`)?.value || '';
+                title = titleInput ? titleInput.value : '';
+            }
+
+            const filenameInput = document.querySelector(`#file-list-common input[name="filenames[${index}]"]`);
+            // const filename = document.querySelector(`#file-list-common input[name="filenames[${index}]"]`)?.value || '';
+            const filename = filenameInput ? filenameInput.value : '';
+
             formData.append('titles', title);
             formData.append('filenames', filename);
         });
-        const commonPhrase = document.getElementById('common-phrase').value || '';
-        const position = document.querySelector('input[name="position"]:checked')?.value || 'start';
+        // const position = document.querySelector('input[name="position"]:checked')?.value || 'start';
+    
         formData.append('common_phrase', commonPhrase);
         formData.append('position', position);
-        const response = await fetch('/upload_common', { method: 'POST', body: formData });
-        if (response.ok) {
+    
+        try {
+            const response = await fetch('/upload_common', { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Upload failed:', errorText);
+                alert('アップロードに失敗しました。詳細: ' + errorText);
+                return;
+            }
+    
+            const disposition = response.headers.get("Content-Disposition");
+            let filename = "download.zip";
+            if (disposition && disposition.includes("filename=")) {
+                const match = disposition.match(/filename="(.+?)"/);
+                if (match && match[1]) {
+                    filename = match[1];
+                }
+            }
+    
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
+    
             files.common = [];
+            metadataTitles.common = [];
             renderFileList('common');
             updateEditButtonState('common');
-        } else {
-            alert('アップロードに失敗しました。');
-        }    
+        } catch (error) {
+            alert('ネットワークエラーが発生しました。');
+        }
     });
 
 
@@ -553,7 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'modified_pdfs_' + getTimestamp() + '.zip';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
