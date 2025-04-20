@@ -201,8 +201,8 @@ footer {
 }
 
 .drop-area.uploading {
-    box-shadow: 0 0 15px #60a5fa;
-    background-color: rgba(253, 208, 0, 0.8);
+    box-shadow: 0 0 15px #94c23f;
+    background-color: #dfffb4;
 }
 
 .drop-area.is-hidden {
