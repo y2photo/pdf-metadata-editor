@@ -4,3 +4,5 @@ assets/external/
 .web
 .states
 *.db
+.DS_Store
+venv/
