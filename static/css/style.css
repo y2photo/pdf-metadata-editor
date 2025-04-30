@@ -26,6 +26,20 @@ header h1 {
     font-size: 24px;
 }
 
+header a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+header .login-status {
+    color: #fff;
+    margin-left: auto;
+}
+
+header .faq {
+    margin-left: 20px;
+}
+
 header .faq a {
     display: block;
     margin-right: 25px;
@@ -34,15 +48,13 @@ header .faq a {
     background-color: #fff;
     color: #003894;
     font-weight: 600;
+    text-decoration: none;
 }
+
 header .faq a:hover {
     color: #94c23f;
     background-color: #efefef;
 }
-header .faq {
-    margin-left: auto;
-}
-
 section {
     max-width: 940px;
     padding: 20px;

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>PDFメタデータ編集アプリ ログイン</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+        }
+        .error {
+            color: red;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDFメタデータ編集アプリ ログイン</h1>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login">
+        <div><input type="text" name="username" placeholder="ユーザー名" required></div>
+        <div><input type="password" name="password" placeholder="パスワード" required></div>
+        <div><button type="submit">ログイン</button></div>
+    </form>
+</body>
+</html>

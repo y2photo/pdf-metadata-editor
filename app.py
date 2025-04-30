@@ -3,16 +3,27 @@ import zipfile
 import re
 from typing import List
 from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
-from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, FileResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Depends
+from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+import secrets
 import pypdf
 import json
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# セッション用の秘密鍵（ランダム生成された長い文字列を使用）
+app.add_middleware(SessionMiddleware, secret_key="supersecretkey123")
+
+templates = Jinja2Templates(directory="templates")
+
+# 設定されたID/PW（必要なら環境変数やconfigファイルにしてもOK）
+VALID_USERNAME = "MYuser"
+VALID_PASSWORD = "my1869"
 
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
@@ -34,10 +45,32 @@ field_map = {
     "P": "新刊:医学"
 }
 
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/login", response_class=HTMLResponse)
+def login_form(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.post("/login")
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    if username == VALID_USERNAME and password == VALID_PASSWORD:
+        request.session["logged_in"] = True
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "error": "IDまたはパスワードが違います"
+    })
+
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    if not request.session.get("logged_in"):
+        return RedirectResponse("/login")
+    return templates.TemplateResponse("index.html", {"request": request, "logged_in": True})
+
+
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", status_code=302)
 
 @app.get("/faq", response_class=HTMLResponse)
 async def show_faq(request: Request):
