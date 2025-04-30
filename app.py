@@ -1,3 +1,4 @@
+import os
 import io
 import zipfile
 import re
@@ -8,22 +9,26 @@ from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, Fil
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from dotenv import load_dotenv
 import secrets
 import pypdf
 import json
+
+# 環境変数の読み込み
+load_dotenv()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # セッション用の秘密鍵（ランダム生成された長い文字列を使用）
-app.add_middleware(SessionMiddleware, secret_key="supersecretkey123")
+app.add_middleware(SessionMiddleware, secret_key="supersecretkey1869")
 
 templates = Jinja2Templates(directory="templates")
 
 # 設定されたID/PW（必要なら環境変数やconfigファイルにしてもOK）
-VALID_USERNAME = "MYuser"
-VALID_PASSWORD = "my1869"
+VALID_USERNAME = os.getenv("USER_ID")
+VALID_PASSWORD = os.getenv("USER_PASSWORD")
 
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
