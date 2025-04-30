@@ -14,6 +14,12 @@ import secrets
 import pypdf
 import json
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not needed on production
+
 # 環境変数の読み込み
 load_dotenv()
 
@@ -26,7 +32,12 @@ app.add_middleware(SessionMiddleware, secret_key="supersecretkey1869")
 
 templates = Jinja2Templates(directory="templates")
 
-# 設定されたID/PW（必要なら環境変数やconfigファイルにしてもOK）
+# ローカル開発時だけ dotenv を使う
+if os.getenv("ENV") != "production":
+    from dotenv import load_dotenv
+    load_dotenv()
+
+# 設定されたID/PW
 VALID_USERNAME = os.getenv("USER_ID")
 VALID_PASSWORD = os.getenv("USER_PASSWORD")
 
