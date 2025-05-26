@@ -129,6 +129,8 @@ async def upload_normal(
             writer = pypdf.PdfWriter()
             for page in reader.pages:
                 writer.add_page(page)
+
+            full_title = title.strip()
             # 既存のメタデータをベースにコピー（pypdf では reader.metadata は辞書ライク）
             existing_metadata = reader.metadata or {}
             # 必要な項目だけ上書き
