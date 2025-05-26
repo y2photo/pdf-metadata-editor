@@ -302,10 +302,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = tabId === 'sequential'
             ? ['ファイル名', 'タイトル', '番号']
             : ['ファイル名', 'タイトル'];
-        headers.forEach(text => {
+        headers.forEach((text, index) => {
             const th = document.createElement('th');
-            
             th.textContent = text;
+            
+            // クラス追加
+            if (tabId === 'normal') {
+                th.classList.add(index === 0 ? 'filename' : 'title');
+            } else if (tabId === 'sequential') {
+                th.classList.add(index === 0 ? 'filename' : index === 1 ? 'title' : 'number');
+            }
 
             trHead.appendChild(th);
         });
@@ -319,9 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tdName = document.createElement('td');
             tdName.textContent = file.name;
+            if (tabId === 'normal') tdName.classList.add('filename');
             tr.appendChild(tdName);
 
             const tdTitle = document.createElement('td');
+            tdTitle.classList.add('title');
             const wrapper = document.createElement('div');
             wrapper.classList.add('input-wrapper');
 

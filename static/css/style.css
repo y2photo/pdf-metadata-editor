@@ -342,8 +342,8 @@ footer {
     text-align: center;
 }
 
-#file-list-normal th.filename,
-#file-list-normal td.filename {
+.file-list#file-list-normal th.filename,
+.file-list#file-list-normal td.filename {
     width: 40%;
     overflow: hidden;
     text-overflow: ellipsis;
