@@ -62,7 +62,7 @@
         <section class="tab-container">
             <div class="tabs">
                 <button class="tab active" data-tab="normal">通常アップロード</button>
-                <button class="tab" data-tab="sequential">連番ファイル</button>
+                <button class="tab" data-tab="sequential">番号付きファイル</button>
                 <button class="tab" data-tab="common">共通語句あり</button>
                 <button class="tab" data-tab="newrelease">丸善新刊案内PDF</button>
             </div>
@@ -81,9 +81,12 @@
                 </form>
             </div>
         
-            <!-- 連番 -->
+            <!-- 番号付き -->
             <div class="tab-content" id="sequential">
-                <p>▶︎連番になっているファイルの連番をそのまま活かしたい場合にはこちらから</p>
+                <p>▶︎番号が付いているファイルで番号も含めたタイトルにしたい場合にはこちらから<br>
+                ・連番の位置がタイトルの前だと　共通部分 + 番号 + タイトル<br>
+                ・連番の位置がタイトルの後だと　共通部分 + タイトル + 番号<br>
+                の並びになります。</p>
                 <div class="drop-area" id="drop-area-sequential">
                     <p>PDFファイルをドラッグ＆ドロップ<br>または</p>
                     <button type="button" class="select-button">ファイル選択</button>

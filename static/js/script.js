@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 最後に1桁
         const match1 = cleanedName.match(/\d(?!.*\d)/);
         if (match1) return match1[0];
-        
+
         return 'N/A';
     }
 
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="text" id="prefix" name="prefix">
                 </div>
                 <div class="input-group">
-                    <label>連番の位置：</label>
+                    <label>番号の位置：</label>
                     <div class="radio-group">
                         <input type="radio" id="position-prefix" name="position-sequential" value="prefix" checked>
                         <label for="position-prefix">タイトルの前</label>
