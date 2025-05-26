@@ -65,10 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function extractNumber(name) {
         const cleanedName = name.replace(/\d{6}_/g, '');
-        const matches = cleanedName.match(/\d{2}/);
-        if (matches) return matches[0];
-        const longMatch = cleanedName.match(/\d{3,}/);
-        if (longMatch) return longMatch[0].slice(-2);
+        // 3桁を優先してマッチ
+        const match3 = cleanedName.match(/\d{3}(?!.*\d)/);  // 末尾に最も近い3桁の数字
+        if (match3) return match3[0];
+        // 次に2桁
+        const match2 = cleanedName.match(/\d{2}(?!.*\d)/);
+        if (match2) return match2[0];
+        // 最後に1桁
+        const match1 = cleanedName.match(/\d(?!.*\d)/);
+        if (match1) return match1[0];
+        
         return 'N/A';
     }
 
@@ -189,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             prefixSuffix.innerHTML = `
                 <div class="input-group">
-                    <label for="prefix">幹部分：</label>
+                    <label for="prefix">共通部分：</label>
                     <input type="text" id="prefix" name="prefix">
                 </div>
                 <div class="input-group">
