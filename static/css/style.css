@@ -342,15 +342,15 @@ footer {
     text-align: center;
 }
 
-#normal th.filename,
-#normal td.filename {
+#file-list-normal th.filename,
+#file-list-normal td.filename {
     width: 40%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-#normal th.title,
-#normal td.title {
+#file-list-normal th.title,
+#file-list-normal td.title {
     width: 60%;
 }
 
