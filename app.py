@@ -129,7 +129,16 @@ async def upload_normal(
             writer = pypdf.PdfWriter()
             for page in reader.pages:
                 writer.add_page(page)
-            writer.add_metadata({"/Title": title, "/Author": AUTHOR})
+            # 既存のメタデータをベースにコピー（pypdf では reader.metadata は辞書ライク）
+            existing_metadata = reader.metadata or {}
+            # 必要な項目だけ上書き
+            new_metadata = {
+                **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
+                "/Title": full_title,
+                "/Author": AUTHOR
+            }
+
+            writer.add_metadata(new_metadata)
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(file.filename, output_buffer.getvalue())
@@ -171,8 +180,17 @@ async def upload_sequential(
                 full_title = f"{prefix} {title} {number}"
             else:
                 full_title = f"{number} {title}"
+            
+            # 既存のメタデータをベースにコピー（pypdf では reader.metadata は辞書ライク）
+            existing_metadata = reader.metadata or {}
+            # 必要な項目だけ上書き
+            new_metadata = {
+                **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
+                "/Title": full_title,
+                "/Author": AUTHOR
+            }
 
-            writer.add_metadata({"/Title": full_title.strip(), "/Author": AUTHOR})
+            writer.add_metadata(new_metadata)
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(file.filename, output_buffer.getvalue())
@@ -217,8 +235,17 @@ async def upload_common(
                 full_title = f"{title} {common_phrase}".strip()
             else:
                 full_title = title
+            
+            # 既存のメタデータをベースにコピー（pypdf では reader.metadata は辞書ライク）
+            existing_metadata = reader.metadata or {}
+            # 必要な項目だけ上書き
+            new_metadata = {
+                **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
+                "/Title": full_title,
+                "/Author": AUTHOR
+            }
 
-            writer.add_metadata({"/Title": full_title, "/Author": AUTHOR})
+            writer.add_metadata(new_metadata)
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(filename, output_buffer.getvalue())
