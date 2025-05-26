@@ -342,12 +342,12 @@ footer {
     text-align: center;
 }
 
-.file-list#file-list-normal th.filename,
-.file-list#file-list-normal td.filename {
-    width: 40%;
+#file-list-normal th.filename,
+#file-list-normal td.filename {
+    max-width: 360px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    text-wrap: nowrap;
 }
 #file-list-normal th.title,
 #file-list-normal td.title {
