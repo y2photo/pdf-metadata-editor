@@ -342,6 +342,18 @@ footer {
     text-align: center;
 }
 
+#normal th.filename,
+#normal td.filename {
+    width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#normal th.title,
+#normal td.title {
+    width: 60%;
+}
+
 .prefix-suffix,
 .common-controls {
     margin-bottom: 10px;
