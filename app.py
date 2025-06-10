@@ -3,6 +3,8 @@ import io
 import zipfile
 import re
 from typing import List
+from pypdf import PdfReader, PdfWriter
+from pypdf.generic import DecodedStreamObject, NameObject, create_string_object
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, FileResponse, RedirectResponse
@@ -11,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 import secrets
-import pypdf
+
 import json
 
 try:
@@ -44,6 +46,7 @@ VALID_PASSWORD = os.getenv("USER_PASSWORD")
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
 AUTHOR = "丸善雄松堂株式会社"
+CREATER = "PyPDF"
 JST = timezone(timedelta(hours=9))
 
 field_map = {
@@ -137,10 +140,38 @@ async def upload_normal(
             new_metadata = {
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
-                "/Author": AUTHOR
+                "/Author": AUTHOR,
+                "/Creater": CREATER
             }
 
             writer.add_metadata(new_metadata)
+
+            # ---------- XMP メタデータも更新 ----------
+            xmp_template = f"""
+             <x:xmpmeta xmlns:x='adobe:ns:meta/'>
+             <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+              <rdf:Description rdf:about=''
+                xmlns:dc='http://purl.org/dc/elements/1.1/'>
+                <dc:title>
+                  <rdf:Alt><rdf:li xml:lang='x-default'>{full_title}</rdf:li></rdf:Alt>
+                </dc:title>
+                <dc:creator>
+                  <rdf:Seq><rdf:li>{AUTHOR}</rdf:li></rdf:Seq>
+                </dc:creator>
+              </rdf:Description>
+             </rdf:RDF>
+            </x:xmpmeta>
+            """.strip()
+
+            meta_stream = DecodedStreamObject()
+            meta_stream.set_data(xmp_template.encode("utf-8"))
+            meta_stream.update({
+                NameObject("/Subtype"): NameObject("/XML"),
+                NameObject("/Type"): NameObject("/Metadata")
+            })
+            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+            # ---------- ここまで追加 ----------
+
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(file.filename, output_buffer.getvalue())
@@ -193,6 +224,33 @@ async def upload_sequential(
             }
 
             writer.add_metadata(new_metadata)
+            
+            # ---------- XMP メタデータも更新 ----------
+            xmp_template = f"""
+             <x:xmpmeta xmlns:x='adobe:ns:meta/'>
+             <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+              <rdf:Description rdf:about=''
+                xmlns:dc='http://purl.org/dc/elements/1.1/'>
+                <dc:title>
+                  <rdf:Alt><rdf:li xml:lang='x-default'>{full_title}</rdf:li></rdf:Alt>
+                </dc:title>
+                <dc:creator>
+                  <rdf:Seq><rdf:li>{AUTHOR}</rdf:li></rdf:Seq>
+                </dc:creator>
+              </rdf:Description>
+             </rdf:RDF>
+            </x:xmpmeta>
+            """.strip()
+
+            meta_stream = DecodedStreamObject()
+            meta_stream.set_data(xmp_template.encode("utf-8"))
+            meta_stream.update({
+                NameObject("/Subtype"): NameObject("/XML"),
+                NameObject("/Type"): NameObject("/Metadata")
+            })
+            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+            # ---------- ここまで追加 ----------
+
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(file.filename, output_buffer.getvalue())
@@ -248,6 +306,33 @@ async def upload_common(
             }
 
             writer.add_metadata(new_metadata)
+            
+            # ---------- XMP メタデータも更新 ----------
+            xmp_template = f"""
+             <x:xmpmeta xmlns:x='adobe:ns:meta/'>
+             <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+              <rdf:Description rdf:about=''
+                xmlns:dc='http://purl.org/dc/elements/1.1/'>
+                <dc:title>
+                  <rdf:Alt><rdf:li xml:lang='x-default'>{full_title}</rdf:li></rdf:Alt>
+                </dc:title>
+                <dc:creator>
+                  <rdf:Seq><rdf:li>{AUTHOR}</rdf:li></rdf:Seq>
+                </dc:creator>
+              </rdf:Description>
+             </rdf:RDF>
+            </x:xmpmeta>
+            """.strip()
+
+            meta_stream = DecodedStreamObject()
+            meta_stream.set_data(xmp_template.encode("utf-8"))
+            meta_stream.update({
+                NameObject("/Subtype"): NameObject("/XML"),
+                NameObject("/Type"): NameObject("/Metadata")
+            })
+            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+            # ---------- ここまで追加 ----------
+
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
             zip_file.writestr(filename, output_buffer.getvalue())
