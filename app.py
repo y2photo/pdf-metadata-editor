@@ -3,7 +3,7 @@ import io
 import zipfile
 import re
 from typing import List
-from pypdf import PdfReader, PdfWriter
+import pypdf
 from pypdf.generic import DecodedStreamObject, NameObject, create_string_object
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Depends
@@ -169,7 +169,12 @@ async def upload_normal(
                 NameObject("/Subtype"): NameObject("/XML"),
                 NameObject("/Type"): NameObject("/Metadata")
             })
-            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+
+            # ★ 間接オブジェクトとして writer に登録
+            meta_ref = writer._add_object(meta_stream)
+
+            # ★ ルート辞書に “間接オブジェクト参照” をセット
+            writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
 
             output_buffer = io.BytesIO()
@@ -220,7 +225,8 @@ async def upload_sequential(
             new_metadata = {
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
-                "/Author": AUTHOR
+                "/Author": AUTHOR,
+                "/Creater": CREATER
             }
 
             writer.add_metadata(new_metadata)
@@ -248,7 +254,12 @@ async def upload_sequential(
                 NameObject("/Subtype"): NameObject("/XML"),
                 NameObject("/Type"): NameObject("/Metadata")
             })
-            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+
+            # ★ 間接オブジェクトとして writer に登録
+            meta_ref = writer._add_object(meta_stream)
+
+            # ★ ルート辞書に “間接オブジェクト参照” をセット
+            writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
 
             output_buffer = io.BytesIO()
@@ -302,7 +313,8 @@ async def upload_common(
             new_metadata = {
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
-                "/Author": AUTHOR
+                "/Author": AUTHOR,
+                "/Creater": CREATER
             }
 
             writer.add_metadata(new_metadata)
@@ -330,7 +342,12 @@ async def upload_common(
                 NameObject("/Subtype"): NameObject("/XML"),
                 NameObject("/Type"): NameObject("/Metadata")
             })
-            writer._root_object.update({NameObject("/Metadata"): meta_stream})
+
+            # ★ 間接オブジェクトとして writer に登録
+            meta_ref = writer._add_object(meta_stream)
+
+            # ★ ルート辞書に “間接オブジェクト参照” をセット
+            writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
 
             output_buffer = io.BytesIO()
