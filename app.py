@@ -4,7 +4,7 @@ import zipfile
 import re
 from typing import List
 import pypdf
-from pypdf.generic import DecodedStreamObject, NameObject, create_string_object
+from pypdf.generic import DecodedStreamObject, NameObject, create_string_object, BooleanObject, DictionaryObject
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse, FileResponse, RedirectResponse
@@ -46,7 +46,7 @@ VALID_PASSWORD = os.getenv("USER_PASSWORD")
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 20
 AUTHOR = "丸善雄松堂株式会社"
-CREATER = "PyPDF"
+PRODUCER = "PyPDF"
 JST = timezone(timedelta(hours=9))
 
 field_map = {
@@ -141,7 +141,7 @@ async def upload_normal(
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
                 "/Author": AUTHOR,
-                "/Creater": CREATER
+                "/Producer": PRODUCER
             }
 
             writer.add_metadata(new_metadata)
@@ -176,6 +176,13 @@ async def upload_normal(
             # ★ ルート辞書に “間接オブジェクト参照” をセット
             writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
+            # --- 既存の Info 辞書 + XMP 更新コードのあとに追記 ---
+            vp = writer._root_object.get("/ViewerPreferences")
+            if vp is None:
+                # 初めて設定する場合
+                vp = DictionaryObject()
+            writer._root_object[NameObject("/ViewerPreferences")] = vp
+            vp.update({NameObject("/DisplayDocTitle"): BooleanObject(True)})
 
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
@@ -226,7 +233,7 @@ async def upload_sequential(
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
                 "/Author": AUTHOR,
-                "/Creater": CREATER
+                "/Producer": PRODUCER
             }
 
             writer.add_metadata(new_metadata)
@@ -261,6 +268,13 @@ async def upload_sequential(
             # ★ ルート辞書に “間接オブジェクト参照” をセット
             writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
+            # --- 既存の Info 辞書 + XMP 更新コードのあとに追記 ---
+            vp = writer._root_object.get("/ViewerPreferences")
+            if vp is None:
+                # 初めて設定する場合
+                vp = DictionaryObject()
+            writer._root_object[NameObject("/ViewerPreferences")] = vp
+            vp.update({NameObject("/DisplayDocTitle"): BooleanObject(True)})
 
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
@@ -314,7 +328,7 @@ async def upload_common(
                 **existing_metadata,  # 元のメタデータを展開（/Keywordsなど含む）
                 "/Title": full_title,
                 "/Author": AUTHOR,
-                "/Creater": CREATER
+                "/Producer": PRODUCER
             }
 
             writer.add_metadata(new_metadata)
@@ -349,6 +363,13 @@ async def upload_common(
             # ★ ルート辞書に “間接オブジェクト参照” をセット
             writer._root_object.update({NameObject("/Metadata"): meta_ref})
             # ---------- ここまで追加 ----------
+            # --- 既存の Info 辞書 + XMP 更新コードのあとに追記 ---
+            vp = writer._root_object.get("/ViewerPreferences")
+            if vp is None:
+                # 初めて設定する場合
+                vp = DictionaryObject()
+            writer._root_object[NameObject("/ViewerPreferences")] = vp
+            vp.update({NameObject("/DisplayDocTitle"): BooleanObject(True)})
 
             output_buffer = io.BytesIO()
             writer.write(output_buffer)
