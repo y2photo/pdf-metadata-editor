@@ -511,8 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const droppedFiles = Array.from(e.dataTransfer.files).filter(
                 f => f.type === 'application/pdf' && f.size <= 10 * 1024 * 1024
             );
-            if (files[tabId].length + droppedFiles.length > 20) {
-                alert('最大20ファイルまでです');
+            if (files[tabId].length + droppedFiles.length > 31) {
+                alert('最大31ファイルまでです');
                 dropArea.classList.remove('uploading');
                 return;
             }
