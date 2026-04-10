@@ -483,8 +483,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedFiles = Array.from(fileInput.files).filter(
                 f => f.type === 'application/pdf' && f.size <= 10 * 1024 * 1024
             );
-            if (files[tabId].length + selectedFiles.length > 20) {
-                alert('最大20ファイルまでです');
+            if (files[tabId].length + selectedFiles.length > 31) {
+                alert('最大31ファイルまでです');
                 return;
             }
             files[tabId].push(...selectedFiles);
