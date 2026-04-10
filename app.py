@@ -44,7 +44,7 @@ VALID_USERNAME = os.getenv("USER_ID")
 VALID_PASSWORD = os.getenv("USER_PASSWORD")
 
 MAX_SIZE = 10 * 1024 * 1024
-MAX_FILES = 20
+MAX_FILES = 31
 AUTHOR = "丸善雄松堂株式会社"
 PRODUCER = "PyPDF"
 JST = timezone(timedelta(hours=9))
